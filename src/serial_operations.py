@@ -3,37 +3,7 @@ import serial.tools.list_ports
 
 from commands import Commands
 
-
-def open_serial_connection(port='COM4', baudrate=115200):
-    try:
-        ser = serial.Serial(port, baudrate, timeout=1)
-        return ser
-    except serial.SerialException as e:
-        print(f"Failed to open serial connection: {e}")
-        return None
-
-
-def send_serial_command(ser, command):
-    try:
-        if ser and ser.is_open:
-            ser.write(command)
-            ser.flush()
-            response = ser.readline().decode().strip()
-            return response
-        else:
-            print("Serial connection is not open.")
-            return None
-    except serial.SerialException as e:
-        print(f"Failed to send command: {e}")
-        return None
-
-
-def close_serial_connection(ser):
-    if ser and ser.is_open:
-        ser.close()
-
-
-def find_all_busy_tag_devices():
+def find_all_busy_tag_devices() -> list or None:
     devices = []
 
     ports = serial.tools.list_ports.comports()
@@ -43,7 +13,7 @@ def find_all_busy_tag_devices():
             ser = serial.Serial(port, baudrate=115200, timeout=1, write_timeout=1)
             ser.flushInput()
             ser.flushOutput()
-            ser.write(Commands.GetDeviceName)
+            ser.write(Commands.GetDeviceName.encode())
             response = ser.readline().decode('utf-8').strip()
 
             if response.startswith("+DN:busytag-"):

@@ -4,26 +4,30 @@ class Commands:
     # https://luxafor.helpscoutdocs.com/article/47-busy-tag-usb-cdc-command-reference-guide
 
     # Get Commands
-    GetDeviceName = b"AT+GDN\r\n"
-    GetManufactureName = b"AT+GMN\r\n"
-    GetDeviceId = b"AT+GID\r\n"
-    GetFirmwareVersion = b"AT+GFV\r\n"
-    GetPictureList = b"AT+GPL\r\n"
-    GetFileList = b"AT+GFL\r\n"
-    GetLocalHostAddress = b"AT+GLHA\r\n"
-    GetFreeStorageSize = b"AT+GFSS\r\n"
-    GetTotalStorageSize = b"AT+GTSS\r\n"
+    GetDeviceName = "AT+GDN\r\n"
+    GetManufactureName = "AT+GMN\r\n"
+    GetDeviceId = "AT+GID\r\n"
+    GetFirmwareVersion = "AT+GFV\r\n"
+    GetPictureList = "AT+GPL\r\n"
+    GetFileList = "AT+GFL\r\n"
+    GetLocalHostAddress = "AT+GLHA\r\n"
+    GetFreeStorageSize = "AT+GFSS\r\n"
+    GetTotalStorageSize = "AT+GTSS\r\n"
 
     # TODO : FIRMWARE CHECKUP
-    GetLastErrorCode = b"AT+GLEC\r\n" # Since Firmware Version 0.8
+    GetLastErrorCode = "AT+GLEC\r\n" # Since Firmware Version 0.8
 
     # TODO : FIRMWARE CHECKUP
-    GetLastResetReasonForCoreZero = b"AT+GLRR0\r\n"  # Since Firmware Version 1.1
-    GetLastResetReasonForCoreOne = b"AT+GLRR1\r\n"   # Since Firmware Version 1.1
+    GetLastResetReasonForCoreZero = "AT+GLRR0\r\n"  # Since Firmware Version 1.1
+    GetLastResetReasonForCoreOne = "AT+GLRR1\r\n"   # Since Firmware Version 1.1
 
     # Set and Get Commands
-    # TODO : SET USAGE HERE
-    SolidColor = b"AT+SC\r\n"
+    # TODO : SET USAGE HERE AS Template
+    SetSolidColor = "AT+SC={led_bits},{color_hex}\r\n"
+
+    # TODO : Get Solid Color
+    GetSolidColor = "AT+SC\r\n"
+
     CustomPattern = b"AT+CP\r\n"
     DisplayBrightness = b"AT+DB\r\n"
     ShowAfterDrop = b"AT+SAD\r\n"

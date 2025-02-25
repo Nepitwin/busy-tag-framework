@@ -1,14 +1,15 @@
-from serial_operations import find_all_busy_tag_devices, open_serial_connection, send_serial_command, close_serial_connection
-from commands import Commands
+from serial_operations import find_all_busy_tag_devices
+from led import Led
+from busy_api import BusyApi
 
 devices = find_all_busy_tag_devices()
+if not devices:
+    print("No devices found.")
+    exit()
+
 print(devices)
-ser = open_serial_connection(devices[0]["port"])
-print(send_serial_command(ser, Commands.GetDeviceId))
-print(send_serial_command(ser, Commands.GetFirmwareVersion))
-print(send_serial_command(ser, Commands.GetFreeStorageSize))
-print(send_serial_command(ser, Commands.GetTotalStorageSize))
-print(send_serial_command(ser, Commands.WifiConfig))
-print(send_serial_command(ser, Commands.SolidColor))
-print(send_serial_command(ser, Commands.DisplayBrightness))
-close_serial_connection(ser)
+
+with BusyApi(devices[0]) as busy_api:
+    busy_api.set_solid_color(Led.LeftTop | Led.MiddleTop | Led.RightTop | Led.LeftMiddle | Led.RightMiddle | Led.LeftBottom | Led.RightBottom, "FF0000")
+
+
