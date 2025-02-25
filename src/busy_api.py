@@ -35,6 +35,22 @@ class BusyApi:
         # TODO ERROR HANDLING
         return response
 
+    def set_showing_picture(self, filename:str) -> bool:
+        # TODO : Implement
+        command = Commands.SetShowingPicture.format(filename=filename)
+        response = self._send_serial_command(command.encode())
+        print(response)
+        # TODO ERROR HANDLING
+        return True
+
+    def set_brightness(self, brightness:int) -> bool:
+        # TODO : Implement
+        command = Commands.SetDisplayBrightness.format(brightness=brightness)
+        response = self._send_serial_command(command.encode())
+        print(response)
+        # TODO ERROR HANDLING
+        return True
+
     @staticmethod
     def _is_valid_hex_color(color):
         return bool(re.fullmatch(r"#?[0-9A-Fa-f]{6}|#?[0-9A-Fa-f]{3}", color))

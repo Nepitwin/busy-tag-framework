@@ -24,10 +24,11 @@ class Commands:
     # Set and Get Commands
     # TODO : SET USAGE HERE AS Template
     SetSolidColor = "AT+SC={led_bits},{color_hex}\r\n"
+    SetShowingPicture = "AT+SP={filename}\r\n"
+    SetDisplayBrightness = "AT+DB={brightness}\r\n"
 
     # TODO : Get Solid Color
     GetSolidColor = "AT+SC\r\n"
-
     CustomPattern = b"AT+CP\r\n"
     DisplayBrightness = b"AT+DB\r\n"
     ShowAfterDrop = b"AT+SAD\r\n"

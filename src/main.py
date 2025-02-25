@@ -10,6 +10,6 @@ if not devices:
 print(devices)
 
 with BusyApi(devices[0]) as busy_api:
-    busy_api.set_solid_color(Led.LeftTop | Led.MiddleTop | Led.RightTop | Led.LeftMiddle | Led.RightMiddle | Led.LeftBottom | Led.RightBottom, "FF0000")
-
-
+    busy_api.set_solid_color(Led.LeftTop | Led.MiddleTop | Led.RightTop | Led.LeftMiddle | Led.RightMiddle | Led.LeftBottom | Led.RightBottom, "00FF00")
+    busy_api.set_showing_picture("hello_ez.gif")
+    busy_api.set_brightness(100)
