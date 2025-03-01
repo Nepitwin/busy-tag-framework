@@ -1,7 +1,7 @@
 import serial
 import serial.tools.list_ports
 
-from commands import Commands
+from busy_tag_framework.commands import Commands
 
 def find_all_busy_tag_devices() -> list or None:
     devices = []
