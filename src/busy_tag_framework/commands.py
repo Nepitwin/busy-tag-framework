@@ -14,10 +14,10 @@ class Commands:
     GetFreeStorageSize = "AT+GFSS\r\n"
     GetTotalStorageSize = "AT+GTSS\r\n"
 
-    # TODO : FIRMWARE CHECKUP
+    # TODO : FIRMWARE CHECKUP + IMPLEMENT ME
     GetLastErrorCode = "AT+GLEC\r\n" # Since Firmware Version 0.8
 
-    # TODO : FIRMWARE CHECKUP
+    # TODO : FIRMWARE CHECKUP + IMPLEMENT ME
     GetLastResetReasonForCoreZero = "AT+GLRR0\r\n"  # Since Firmware Version 1.1
     GetLastResetReasonForCoreOne = "AT+GLRR1\r\n"   # Since Firmware Version 1.1
 
@@ -27,29 +27,33 @@ class Commands:
     SetShowingPicture = "AT+SP={filename}\r\n"
     SetDisplayBrightness = "AT+DB={brightness}\r\n"
 
-    # TODO : Get Solid Color
-    GetSolidColor = "AT+SC\r\n"
-    CustomPattern = b"AT+CP\r\n"
-    DisplayBrightness = b"AT+DB\r\n"
-    ShowAfterDrop = b"AT+SAD\r\n"
-    AllowedWebFileServer = b"AT+AWFS\r\n"
-    WifiConfig = b"AT+WC\r\n"
-    UsbMassStorageAllowed = b"AT+UMSA\r\n"
-    ShowingPicture = b"AT+SP\r\n"
-    # TODO : FIRMWARE CHECKUP
-    AllowedAutoStorageScan = b"AT+AASS\r\n" # Since Firmware Version 1.1
+    GetSolidColor = "AT+SC?\r\n"
+    GetShowingPicture = "AT+SP?\r\n"
+    GetDisplayBrightness = "AT+DB?\r\n"
+    GetShowAfterDrop = "AT+SAD?\r\n"
+    GetAllowedWebFileServer = "AT+AWFS?\r\n"
+    GetWifiConfig = "AT+WC?\r\n"
+    GetUsbMassStorageAllowed = "AT+UMSA?\r\n"
+
+    # TODO : IMPLEMENT ME
+    GetCustomPattern = "AT+CP?\r\n"
+
+    # TODO : FIRMWARE CHECKUP + IMPLEMENT ME
+    SetAllowedAutoStorageScan = "AT+AASS\r\n" # Since Firmware Version 1.1
+    GetAllowedAutoStorageScan = "AT+AASS?\r\n"  # Since Firmware Version 1.1
 
     # Actions
-    GetFile = b"AT+GF\r\n"
-    UploadFile = b"AT+UF\r\n"
-    DeleteFile = b"AT+DF\r\n"
-    RestartDevice = b"AT+RST\r\n"
-    FormatDisk = b"AT+FD\r\n"
-    ActivateFileStorageScan = b"AT+AFSS\r\n"
+    # TODO : IMPLEMENT ME
+    GetFile = "AT+GF\r\n"
+    UploadFile = "AT+UF\r\n"
+    DeleteFile = "AT+DF\r\n"
+    RestartDevice = "AT+RST\r\n"
+    FormatDisk = "AT+FD\r\n"
+    ActivateFileStorageScan = "AT+AFSS\r\n"
 
-    # TODO : FIRMWARE CHECKUP
-    FactoryResetMainConfigFile = b"AT+FRMCF\r\n" # Since Firmware Version 1.1
-    FactoryResetWifiConfigFile = b"AT+FRWCF\r\n" # Since Firmware Version 1.1
-    FactoryResetDefaultImage = b"AT+FRDI\r\n" # Since Firmware Version 1.1
+    # TODO : FIRMWARE CHECKUP + IMPLEMENT ME
+    FactoryResetMainConfigFile = "AT+FRMCF\r\n" # Since Firmware Version 1.1
+    FactoryResetWifiConfigFile = "AT+FRWCF\r\n" # Since Firmware Version 1.1
+    FactoryResetDefaultImage = "AT+FRDI\r\n" # Since Firmware Version 1.1
 
 

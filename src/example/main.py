@@ -24,5 +24,18 @@ with BusyApi(devices[0]) as busy_api:
 
     # Set and Get Commands
     busy_api.set_solid_color(Led.LeftTop | Led.MiddleTop | Led.RightTop | Led.LeftMiddle | Led.RightMiddle | Led.LeftBottom | Led.RightBottom, "00FF00")
+    print(busy_api.get_solid_color())
+
+    busy_api.set_display_brightness(100)
+    print(busy_api.get_display_brightness())
+
     busy_api.set_showing_picture("hello_ez.gif")
-    busy_api.set_brightness(100)
+    print(busy_api.get_showing_picture())
+
+    print(busy_api.get_show_after_drop())
+
+    print(busy_api.get_allowed_web_file_server())
+
+    print(busy_api.get_wifi_config())
+
+    print(busy_api.get_usb_mass_storage_allowed())

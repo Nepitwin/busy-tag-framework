@@ -175,6 +175,18 @@ class BusyApi:
         used_percentage = (used_storage / total_storage) * 100
         return int(min(100, max(0, math.ceil(used_percentage))))
 
+    def get_last_error_code(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def get_last_reset_reason_for_core_zero(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def get_last_reset_reason_for_core_one(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
     # Set and Get Commands
 
     def set_solid_color(self, led_bits:int, color_hex:str) -> bool:
@@ -190,11 +202,19 @@ class BusyApi:
         return True
 
     def get_solid_color(self) -> str or None:
-        # TODO : Implement
-        command = Commands.GetSolidColor
-        response = self._send_serial_command(command.encode())
-        # TODO ERROR HANDLING
-        return response
+        """
+        Get the current solid color.
+
+        Returns:
+            str or None: The current solid color in hexadecimal format (e.g., '00FF00') or None if not set.
+
+        Raises:
+            BusyException: If the solid color could not be received from response.
+        """
+        return self._get_result(Commands.GetSolidColor.encode(),
+                                r'\+SC:\d+,(#?[0-9A-Fa-f]{6}|#?[0-9A-Fa-f]{3})',
+                                "Solid color not found",
+                                ErrorCode.SOLID_COLOR_NOT_FOUND)
 
     def set_showing_picture(self, filename:str) -> bool:
         # TODO : Implement
@@ -204,13 +224,185 @@ class BusyApi:
         # TODO ERROR HANDLING
         return True
 
-    def set_brightness(self, brightness:int) -> bool:
+    def get_showing_picture(self) -> str or None:
+        """
+        Get the currently showing picture.
+
+        Returns:
+            str or None: The filename of the currently showing picture or None if not set.
+
+        Raises:
+            BusyException: If the showing picture could not be received from response.
+        """
+        return self._get_result(Commands.GetShowingPicture.encode(),
+                                r'\+SP:(.*)',
+                                "Showing picture not found",
+                                ErrorCode.SHOWING_PICTURE_NOT_FOUND)
+
+    def set_display_brightness(self, brightness:int) -> bool:
         # TODO : Implement
         command = Commands.SetDisplayBrightness.format(brightness=brightness)
         response = self._send_serial_command(command.encode())
         print(response)
         # TODO ERROR HANDLING
         return True
+
+    def get_display_brightness(self) -> int or None:
+        """
+        Get the current display brightness.
+
+        Returns:
+            int or None: The current display brightness (0-100) or None if not set.
+
+        Raises:
+            BusyException: If the display brightness could not be received from response.
+        """
+        result = self._get_result(Commands.GetDisplayBrightness.encode(),
+                                  r'\+DB:(\d+)',
+                                  "Display brightness not found",
+                                  ErrorCode.DISPLAY_BRIGHTNESS_NOT_FOUND)
+        return int(result) if result is not None else None
+
+    def set_show_after_drop(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def get_show_after_drop(self) -> int or None:
+        """
+        Get the show after drop status.
+
+        Returns:
+            int or None: The show after drop status (0 or 1) or None if not set.
+
+        Raises:
+            BusyException: If the show after drop status could not be received from response.
+        """
+        result = self._get_result(Commands.GetShowAfterDrop.encode(),
+                                  r'\+SAD:(\d+)',
+                                  "Show after drop status not found",
+                                  ErrorCode.SHOW_AFTER_DROP_NOT_FOUND)
+        return int(result) if result is not None else None
+
+    def set_allowed_web_file_server(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def get_allowed_web_file_server(self) -> int or None:
+        """
+        Get the allowed web file server status.
+
+        Returns:
+            int or None: The allowed web file server status (0 or 1) or None if not set.
+
+        Raises:
+            BusyException: If the allowed web file server status could not be received from response.
+        """
+        result = self._get_result(Commands.GetAllowedWebFileServer.encode(),
+                                  r'\+AWFS:(\d+)',
+                                  "Allowed web file server status not found",
+                                  ErrorCode.ALLOWED_WEB_FILE_SERVER_NOT_FOUND)
+        return int(result) if result is not None else None
+
+    def set_wifi_config(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def get_wifi_config(self) -> tuple[str, str] or None:
+        """
+        Get the WiFi configuration.
+
+        Returns:
+            tuple[str, str] or None: The SSID and password as a tuple or None if not set.
+
+        Raises:
+            BusyException: If the WiFi configuration could not be received from response.
+        """
+        result = self._get_result(Commands.GetWifiConfig.encode(),
+                                  r'\+WC:(.*)',
+                                  "WiFi configuration not found",
+                                  ErrorCode.WIFI_CONFIG_NOT_FOUND)
+        if result:
+            match = re.match(r'(.*?),(.*)', result)
+            if match:
+                ssid, password = match.groups()
+                return ssid.strip(), password.strip()
+        return None
+
+    def set_usb_mass_storage_allowed(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def get_usb_mass_storage_allowed(self) -> int or None:
+        """
+        Get the USB mass storage allowed status.
+
+        Returns:
+            int or None: The USB mass storage allowed status (0 or 1) or None if not set.
+
+        Raises:
+            BusyException: If the USB mass storage allowed status could not be received from response.
+        """
+        result = self._get_result(Commands.GetUsbMassStorageAllowed.encode(),
+                                  r'\+UMSA:(\d+)',
+                                  "USB mass storage allowed status not found",
+                                  ErrorCode.USB_MASS_STORAGE_ALLOWED_NOT_FOUND)
+        return int(result) if result is not None else None
+
+    def set_custom_pattern(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def get_custom_pattern(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def set_allowed_auto_storage_scan(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def get_allowed_auto_storage_scan(self) -> int or None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    # Actions
+
+    def get_file(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def upload_file(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def delete_file(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def restart_device(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def format_disk(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def activate_file_storage_scan(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def factory_reset_main_config_file(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def factory_reset_wifi_config_file(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    def factory_reset_default_image(self) -> None:
+        # TODO : Implement me
+        raise NotImplementedError
+
+    # Helper methods
 
     def _get_result(self, command: bytes, regex: str, error_message: str, error_code: ErrorCode) -> str:
         """
