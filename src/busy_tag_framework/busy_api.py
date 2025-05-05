@@ -2,7 +2,9 @@ import serial
 import re
 import math
 
-from busy_tag_framework.commands import Commands
+from busy_tag_framework.busy_command import BusyCommand
+from busy_tag_framework.busy_return_type import BusyReturnType
+from busy_tag_framework.command import Command
 from busy_tag_framework.busy_exception import BusyException
 from busy_tag_framework.error_code import ErrorCode
 
@@ -21,143 +23,42 @@ class BusyApi:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._close_serial_connection(self._busy_tag_serial)
 
-    # Get Commands
-    def get_device_name(self) -> str:
+    def get_command(self, command: BusyCommand) -> str or list[str] or int or tuple[str, str] or None:
         """
-        Get the device name from busy tag device.
+        Executes a GET command and returns the result.
+
+        Args:
+            command (BusyCommand): The command to execute. Must be a GET command.
 
         Returns:
-            str: The busy tag device name.
+            str: The result as a string if the return type is STRING.
+            list[str]: A list of strings if the return type is LIST.
+            int: The result as an integer if the return type is NUMBER.
+            tuple[str, str]: A tuple of two strings if the return type is TUPLE.
+            None: If the command does not return a value.
 
         Raises:
-            BusyException: If the device name could not be received from response.
+            BusyException: If the result could not be received or parsed.
         """
-        return self._get_result(Commands.GetDeviceName.encode(),
-                                r'\+DN:(.*)',
-                                "Device name not found",
-                                ErrorCode.DEVICE_NAME_NOT_FOUND)
 
-    def get_manufacture_name(self) -> str:
-        """
-        Get the manufacture name.
+        if command.return_type == BusyReturnType.NUMBER:
+            result = self._get_result(command.action.encode(), command.regex, command.error_msg, command.error_code)
+            return int(result) if result is not None else None
 
-        Returns:
-            str: The manufacture name.
+        elif command.return_type == BusyReturnType.TUPLE:
+            result = self._get_result(command.action.encode(), command.regex, command.error_msg, command.error_code)
+            if result:
+                match = re.match(r'(.*?),(.*)', result)
+                if match:
+                    one, two = match.groups()
+                    return one.strip(), two.strip()
 
-        Raises:
-            BusyException: If the manufacture name could not be received from response.
-        """
-        return self._get_result(Commands.GetManufactureName.encode(),
-                                r'\+MN:(.*)',
-                                "Manufacture name not found",
-                                ErrorCode.MANUFACTURE_NAME_NOT_FOUND)
+            return None
 
-    def get_device_id(self) -> str:
-        """
-        Get the device ID.
+        elif command.return_type == BusyReturnType.LIST:
+            return self._get_list(command.action.encode(), command.regex, command.error_msg, command.error_code)
 
-        Returns:
-            str: The device ID.
-
-        Raises:
-            BusyException: If the device ID could not be received from response.
-        """
-        return self._get_result(Commands.GetDeviceId.encode(),
-                                r'\+ID:(.*)',
-                                "Device ID not found",
-                                ErrorCode.DEVICE_ID_NOT_FOUND)
-
-    def get_firmware_version(self) -> str:
-        """
-        Get the firmware version.
-
-        Returns:
-            str: The firmware version.
-
-        Raises:
-            BusyException: If the firmware version could not be received from response.
-        """
-        return self._get_result(Commands.GetFirmwareVersion.encode(),
-                                r'\+FV:(.*)',
-                                "Firmware version not found",
-                                ErrorCode.FIRMWARE_VERSION_NOT_FOUND)
-
-    def get_picture_list(self) -> list[str]:
-        """
-        Get the list of picture names.
-
-        Returns:
-            list[str]: The list of picture names.
-
-        Raises:
-            BusyException: If the picture list could not be received from response.
-        """
-        return self._get_list(Commands.GetPictureList,
-                              r'\+PL:(.*?),\d+',
-                              "Picture list not found",
-                              ErrorCode.PICTURE_LIST_NOT_FOUND)
-
-    def get_file_list(self) -> list[str]:
-        """
-        Get the list of file names.
-
-        Returns:
-            list[str]: The list of file names.
-
-        Raises:
-            BusyException: If the file list could not be received from response.
-        """
-        return self._get_list(Commands.GetFileList,
-                              r'\+FL:(.*?),file,\d+',
-                              "File list not found",
-                              ErrorCode.FILE_LIST_NOT_FOUND)
-
-    def get_local_host_address(self) -> str:
-        """
-        Get the local host address.
-
-        Returns:
-            str: The local host address.
-
-        Raises:
-            BusyException: If the local host address could not be received from response.
-        """
-        return self._get_result(Commands.GetLocalHostAddress.encode(),
-                                r'\+LHA:(.*)',
-                                "Local host address not found",
-                                ErrorCode.LOCAL_HOST_ADDRESS_NOT_FOUND)
-
-    def get_free_storage_size(self) -> int:
-        """
-        Get the free storage size.
-
-        Returns:
-            int: The free storage size in bytes.
-
-        Raises:
-            BusyException: If the free storage size could not be received from response.
-        """
-        result = self._get_result(Commands.GetFreeStorageSize.encode(),
-                                  r'\+FSS:(\d+)',
-                                  "Free storage size not found",
-                                  ErrorCode.FREE_STORAGE_SIZE_NOT_FOUND)
-        return int(result)
-
-    def get_total_storage_size(self) -> int:
-        """
-        Get the total storage size.
-
-        Returns:
-            int: The total storage size in bytes.
-
-        Raises:
-            BusyException: If the total storage size could not be received from response.
-        """
-        result = self._get_result(Commands.GetTotalStorageSize.encode(),
-                                  r'\+TSS:(\d+)',
-                                  "Total storage size not found",
-                                  ErrorCode.TOTAL_STORAGE_SIZE_NOT_FOUND)
-        return int(result)
+        return self._get_result(command.action.encode(), command.regex, command.error_msg, command.error_code)
 
     def get_used_storage(self) -> int:
         """
@@ -169,8 +70,8 @@ class BusyApi:
         Raises:
             BusyException: If the free or total storage size could not be received from response.
         """
-        total_storage = self.get_total_storage_size()
-        free_storage = self.get_free_storage_size()
+        total_storage = self.get_command(Command.GetTotalStorageSize)
+        free_storage = self.get_command(Command.GetFreeStorageSize)
         used_storage = total_storage - free_storage
         used_percentage = (used_storage / total_storage) * 100
         return int(min(100, max(0, math.ceil(used_percentage))))
@@ -187,166 +88,50 @@ class BusyApi:
         # TODO : Implement me
         raise NotImplementedError
 
-    # Set and Get Commands
-
+    # Set Commands
     def set_solid_color(self, led_bits:int, color_hex:str) -> bool:
         if not self._is_valid_hex_color(color_hex):
             # TODO ERROR HANDLING
             print("Invalid color format.")
             return False
 
-        command = Commands.SetSolidColor.format(led_bits=led_bits, color_hex=color_hex)
+        command = Command.SetSolidColor.format(led_bits=led_bits, color_hex=color_hex)
         response = self._send_serial_command(command.encode())
         print(response)
         # TODO ERROR HANDLING
         return True
-
-    def get_solid_color(self) -> str or None:
-        """
-        Get the current solid color.
-
-        Returns:
-            str or None: The current solid color in hexadecimal format (e.g., '00FF00') or None if not set.
-
-        Raises:
-            BusyException: If the solid color could not be received from response.
-        """
-        return self._get_result(Commands.GetSolidColor.encode(),
-                                r'\+SC:\d+,(#?[0-9A-Fa-f]{6}|#?[0-9A-Fa-f]{3})',
-                                "Solid color not found",
-                                ErrorCode.SOLID_COLOR_NOT_FOUND)
 
     def set_showing_picture(self, filename:str) -> bool:
         # TODO : Implement
-        command = Commands.SetShowingPicture.format(filename=filename)
+        command = Command.SetShowingPicture.format(filename=filename)
         response = self._send_serial_command(command.encode())
         print(response)
         # TODO ERROR HANDLING
         return True
-
-    def get_showing_picture(self) -> str or None:
-        """
-        Get the currently showing picture.
-
-        Returns:
-            str or None: The filename of the currently showing picture or None if not set.
-
-        Raises:
-            BusyException: If the showing picture could not be received from response.
-        """
-        return self._get_result(Commands.GetShowingPicture.encode(),
-                                r'\+SP:(.*)',
-                                "Showing picture not found",
-                                ErrorCode.SHOWING_PICTURE_NOT_FOUND)
 
     def set_display_brightness(self, brightness:int) -> bool:
         # TODO : Implement
-        command = Commands.SetDisplayBrightness.format(brightness=brightness)
+        command = Command.SetDisplayBrightness.format(brightness=brightness)
         response = self._send_serial_command(command.encode())
         print(response)
         # TODO ERROR HANDLING
         return True
-
-    def get_display_brightness(self) -> int or None:
-        """
-        Get the current display brightness.
-
-        Returns:
-            int or None: The current display brightness (0-100) or None if not set.
-
-        Raises:
-            BusyException: If the display brightness could not be received from response.
-        """
-        result = self._get_result(Commands.GetDisplayBrightness.encode(),
-                                  r'\+DB:(\d+)',
-                                  "Display brightness not found",
-                                  ErrorCode.DISPLAY_BRIGHTNESS_NOT_FOUND)
-        return int(result) if result is not None else None
 
     def set_show_after_drop(self) -> None:
         # TODO : Implement me
         raise NotImplementedError
 
-    def get_show_after_drop(self) -> int or None:
-        """
-        Get the show after drop status.
-
-        Returns:
-            int or None: The show after drop status (0 or 1) or None if not set.
-
-        Raises:
-            BusyException: If the show after drop status could not be received from response.
-        """
-        result = self._get_result(Commands.GetShowAfterDrop.encode(),
-                                  r'\+SAD:(\d+)',
-                                  "Show after drop status not found",
-                                  ErrorCode.SHOW_AFTER_DROP_NOT_FOUND)
-        return int(result) if result is not None else None
-
     def set_allowed_web_file_server(self) -> None:
         # TODO : Implement me
         raise NotImplementedError
-
-    def get_allowed_web_file_server(self) -> int or None:
-        """
-        Get the allowed web file server status.
-
-        Returns:
-            int or None: The allowed web file server status (0 or 1) or None if not set.
-
-        Raises:
-            BusyException: If the allowed web file server status could not be received from response.
-        """
-        result = self._get_result(Commands.GetAllowedWebFileServer.encode(),
-                                  r'\+AWFS:(\d+)',
-                                  "Allowed web file server status not found",
-                                  ErrorCode.ALLOWED_WEB_FILE_SERVER_NOT_FOUND)
-        return int(result) if result is not None else None
 
     def set_wifi_config(self) -> None:
         # TODO : Implement me
         raise NotImplementedError
 
-    def get_wifi_config(self) -> tuple[str, str] or None:
-        """
-        Get the WiFi configuration.
-
-        Returns:
-            tuple[str, str] or None: The SSID and password as a tuple or None if not set.
-
-        Raises:
-            BusyException: If the WiFi configuration could not be received from response.
-        """
-        result = self._get_result(Commands.GetWifiConfig.encode(),
-                                  r'\+WC:(.*)',
-                                  "WiFi configuration not found",
-                                  ErrorCode.WIFI_CONFIG_NOT_FOUND)
-        if result:
-            match = re.match(r'(.*?),(.*)', result)
-            if match:
-                ssid, password = match.groups()
-                return ssid.strip(), password.strip()
-        return None
-
     def set_usb_mass_storage_allowed(self) -> None:
         # TODO : Implement me
         raise NotImplementedError
-
-    def get_usb_mass_storage_allowed(self) -> int or None:
-        """
-        Get the USB mass storage allowed status.
-
-        Returns:
-            int or None: The USB mass storage allowed status (0 or 1) or None if not set.
-
-        Raises:
-            BusyException: If the USB mass storage allowed status could not be received from response.
-        """
-        result = self._get_result(Commands.GetUsbMassStorageAllowed.encode(),
-                                  r'\+UMSA:(\d+)',
-                                  "USB mass storage allowed status not found",
-                                  ErrorCode.USB_MASS_STORAGE_ALLOWED_NOT_FOUND)
-        return int(result) if result is not None else None
 
     def set_custom_pattern(self) -> None:
         # TODO : Implement me
@@ -425,7 +210,7 @@ class BusyApi:
             return result
         raise BusyException(error_message, error_code)
 
-    def _get_list(self, command: str, regex: str, error_message: str, error_code: ErrorCode) -> list[str]:
+    def _get_list(self, command: bytes, regex: str, error_message: str, error_code: ErrorCode) -> list[str]:
         """
         Sends a command to the device, parses the response using the given regular expression, and returns a list of matches.
 
@@ -441,7 +226,7 @@ class BusyApi:
         Raises:
             BusyException: If the response could not be received or parsed.
         """
-        response = self._send_serial_command(command.encode())
+        response = self._send_serial_command(command)
         if not response:
             raise BusyException(error_message, error_code)
 
