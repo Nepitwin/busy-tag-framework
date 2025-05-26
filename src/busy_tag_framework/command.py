@@ -24,29 +24,28 @@ class Command:
     GetAllowedWebFileServer = BusyCommand("AT+AWFS?\r\n",r"\+AWFS:(\d+)", "Allowed web file server not found", ErrorCode.ALLOWED_WEB_FILE_SERVER_NOT_FOUND, BusyReturnType.NUMBER)
     GetWifiConfig = BusyCommand("AT+WC?\r\n",r"\+WC:(.*)", "Wifi config not found", ErrorCode.WIFI_CONFIG_NOT_FOUND, BusyReturnType.TUPLE)
     GetUsbMassStorageAllowed = BusyCommand("AT+UMSA?\r\n",r"\+UMSA:(\d+)", "USB mass storage allowed not found", ErrorCode.USB_MASS_STORAGE_ALLOWED_NOT_FOUND, BusyReturnType.NUMBER)
+    GetLastErrorCode = BusyCommand("AT+GLEC\r\n", r"\+LEC:(-?\d+)", "Get last error code not found", ErrorCode.GET_LAST_ERROR_CODE, BusyReturnType.NUMBER, "0.8")
+    GetLastResetReasonForCoreZero = BusyCommand("AT+GLRR0\r\n", r"\+LRR0:(-?\d+)", "Get last reset code for core 0 not found", ErrorCode.GET_LAST_RESET_CODE_CORE_ZERO, BusyReturnType.NUMBER, "1.1")
+    GetLastResetReasonForCoreOne = BusyCommand("AT+GLRR1\r\n", r"\+LRR1:(-?\d+)", "Get last reset code for core 1 not found", ErrorCode.GET_LAST_RESET_CODE_CORE_ONE, BusyReturnType.NUMBER, "1.1")
 
-    # TODO : FIRMWARE CHECKUP + IMPLEMENT ME
-    GetLastErrorCode = "AT+GLEC\r\n" # Since Firmware Version 0.8
-
-    # TODO : FIRMWARE CHECKUP + IMPLEMENT ME
-    GetLastResetReasonForCoreZero = "AT+GLRR0\r\n"  # Since Firmware Version 1.1
-    GetLastResetReasonForCoreOne = "AT+GLRR1\r\n"   # Since Firmware Version 1.1
-
-    # Set and Get Commands
-    # TODO : IMPLEMENT ME
-    SetSolidColor = "AT+SC={led_bits},{color_hex}\r\n"
-    SetShowingPicture = "AT+SP={filename}\r\n"
-    SetDisplayBrightness = "AT+DB={brightness}\r\n"
-
-    # TODO : IMPLEMENT ME
+    # TODO Get Commands to implement
     GetCustomPattern = "AT+CP?\r\n"
-
-    # TODO : FIRMWARE CHECKUP + IMPLEMENT ME
-    SetAllowedAutoStorageScan = "AT+AASS\r\n" # Since Firmware Version 1.1
     GetAllowedAutoStorageScan = "AT+AASS?\r\n"  # Since Firmware Version 1.1
 
-    # Actions
-    # TODO : IMPLEMENT ME
+    # Set Commands
+    # TODO Set Commands to implement
+    SetSolidColor = "AT+SC={led_bits},{color_hex}\r\n"
+    SetCustomPattern = "AT+CP={pattern}\r\n"
+    SetDisplayBrightness = "AT+DB={brightness}\r\n"
+    SetShowAfterDrop = "AT+SAD={brightness}\r\n"
+    SetAllowedWebFileServer = "AT+AWFS?\r\n"
+    SetWifiConfig = "AT+WC={ssid},{password}\r\n"
+    SetUsbMassStorageAllowed = "AT+UMSA={allowed}\r\n"
+    SetShowingPicture = "AT+SP={filename}\r\n"
+    SetAllowedAutoStorageScan = "AT+AASS\r\n" # Since Firmware Version 1.1
+
+    # Action Commands
+    # TODO Actions to implement
     GetFile = "AT+GF\r\n"
     UploadFile = "AT+UF\r\n"
     DeleteFile = "AT+DF\r\n"
@@ -54,9 +53,8 @@ class Command:
     FormatDisk = "AT+FD\r\n"
     ActivateFileStorageScan = "AT+AFSS\r\n"
 
-    # TODO : FIRMWARE CHECKUP + IMPLEMENT ME
+    # Factory Reset Commands
+    # TODO Factory reset commands to implement
     FactoryResetMainConfigFile = "AT+FRMCF\r\n" # Since Firmware Version 1.1
     FactoryResetWifiConfigFile = "AT+FRWCF\r\n" # Since Firmware Version 1.1
     FactoryResetDefaultImage = "AT+FRDI\r\n" # Since Firmware Version 1.1
-
-

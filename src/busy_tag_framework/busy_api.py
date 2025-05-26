@@ -7,6 +7,7 @@ from busy_tag_framework.busy_return_type import BusyReturnType
 from busy_tag_framework.command import Command
 from busy_tag_framework.busy_exception import BusyException
 from busy_tag_framework.error_code import ErrorCode
+from packaging import version
 
 
 class BusyApi:
@@ -40,6 +41,13 @@ class BusyApi:
         Raises:
             BusyException: If the result could not be received or parsed.
         """
+
+        if command.min_firmware_version is not None:
+            min_firmware_version =  version.parse(command.min_firmware_version)
+            firmware_version = version.parse(self.get_command(Command.GetFirmwareVersion))
+            if firmware_version < min_firmware_version:
+                clean_command = command.action.rstrip('\r\n')
+                raise BusyException(f"Command {clean_command} requires firmware version {command.min_firmware_version} or higher, but current version is {firmware_version}.", ErrorCode.FIRMWARE_VERSION_TOO_LOW)
 
         if command.return_type == BusyReturnType.NUMBER:
             result = self._get_result(command.action.encode(), command.regex, command.error_msg, command.error_code)
@@ -75,18 +83,6 @@ class BusyApi:
         used_storage = total_storage - free_storage
         used_percentage = (used_storage / total_storage) * 100
         return int(min(100, max(0, math.ceil(used_percentage))))
-
-    def get_last_error_code(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def get_last_reset_reason_for_core_zero(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def get_last_reset_reason_for_core_one(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
 
     # Set Commands
     def set_solid_color(self, led_bits:int, color_hex:str) -> bool:
@@ -186,8 +182,6 @@ class BusyApi:
     def factory_reset_default_image(self) -> None:
         # TODO : Implement me
         raise NotImplementedError
-
-    # Helper methods
 
     def _get_result(self, command: bytes, regex: str, error_message: str, error_code: ErrorCode) -> str:
         """

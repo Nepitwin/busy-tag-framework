@@ -1,5 +1,7 @@
+from busy_tag_framework.busy import Busy
 from busy_tag_framework import serial_operations
 from busy_tag_framework.busy_api import BusyApi
+from busy_tag_framework.busy_exception import BusyException
 from busy_tag_framework.command import Command
 from busy_tag_framework.led import Led
 
@@ -9,6 +11,32 @@ if not devices:
     exit()
 
 print(devices)
+
+# Error code conversion as enum
+print(Busy.get_last_error_code(-1))
+print(Busy.get_last_error_code(0))
+print(Busy.get_last_error_code(1))
+print(Busy.get_last_error_code(2))
+print(Busy.get_last_error_code(3))
+print(Busy.get_last_error_code(4))
+print(Busy.get_last_error_code(1337))
+
+# Get last reset code as enum
+print(Busy.get_last_reset_code(1))
+print(Busy.get_last_reset_code(3))
+print(Busy.get_last_reset_code(5))
+print(Busy.get_last_reset_code(6))
+print(Busy.get_last_reset_code(7))
+print(Busy.get_last_reset_code(8))
+print(Busy.get_last_reset_code(9))
+print(Busy.get_last_reset_code(11))
+print(Busy.get_last_reset_code(12))
+print(Busy.get_last_reset_code(13))
+print(Busy.get_last_reset_code(14))
+print(Busy.get_last_reset_code(15))
+print(Busy.get_last_reset_code(16))
+print(Busy.get_last_reset_code(0))
+
 
 with BusyApi(devices[0]) as busy_api:
     # Get Commands
@@ -40,3 +68,15 @@ with BusyApi(devices[0]) as busy_api:
     print(busy_api.get_command(Command.GetWifiConfig))
 
     print(busy_api.get_command(Command.GetUsbMassStorageAllowed))
+
+    print(busy_api.get_command(Command.GetLastErrorCode))
+
+    try:
+        print(busy_api.get_command(Command.GetLastResetReasonForCoreZero))
+    except BusyException as e:
+        print(f"Error: {e}")
+
+    try:
+        print(busy_api.get_command(Command.GetLastResetReasonForCoreOne))
+    except BusyException as e:
+        print(f"Error: {e}")
