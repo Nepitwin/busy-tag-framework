@@ -1,3 +1,5 @@
+import sys
+
 from busy_tag_framework.busy import Busy
 from busy_tag_framework import serial_operations
 from busy_tag_framework.busy_api import BusyApi
@@ -8,7 +10,7 @@ from busy_tag_framework.led import Led
 devices = serial_operations.find_all_busy_tag_devices()
 if not devices:
     print("No devices found.")
-    exit()
+    sys.exit(0)
 
 print(devices)
 
