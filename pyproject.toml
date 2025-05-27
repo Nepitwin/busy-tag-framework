@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "busy-tag-framework"
+version = "0.0.1"
+description = "Framework for Busy Tag devices"
+authors = [
+    { name = "Andreas Sekulski", email = "andreas.sekulski@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "pyserial>=3.5",
+    "packaging>=25.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pylint==3.3.7"
+]
