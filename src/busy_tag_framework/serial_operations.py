@@ -1,7 +1,7 @@
 import serial
 import serial.tools.list_ports
 
-from busy_tag_framework.command import Command
+from busy_tag_framework.busy_command import BusyCommand
 
 def find_all_busy_tag_devices() -> list or None:
     devices = []
@@ -13,7 +13,7 @@ def find_all_busy_tag_devices() -> list or None:
             ser = serial.Serial(port, baudrate=115200, timeout=1, write_timeout=1)
             ser.flushInput()
             ser.flushOutput()
-            ser.write(Command.GetDeviceName.action.encode())
+            ser.write(BusyCommand.GetDeviceName.action.encode())
             response = ser.readline().decode('utf-8').strip()
 
             if response.startswith("+DN:busytag-"):

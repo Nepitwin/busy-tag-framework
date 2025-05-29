@@ -1,13 +1,13 @@
-import serial
 import re
 import math
+import serial
 
-from busy_tag_framework.busy_command import BusyCommand
+from packaging import version
+from busy_tag_framework.busy_get_command import BusyGetCommand
 from busy_tag_framework.busy_return_type import BusyReturnType
-from busy_tag_framework.command import Command
+from busy_tag_framework.busy_command import BusyCommand
 from busy_tag_framework.busy_exception import BusyException
 from busy_tag_framework.error_code import ErrorCode
-from packaging import version
 
 
 class BusyApi:
@@ -24,12 +24,12 @@ class BusyApi:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._close_serial_connection(self._busy_tag_serial)
 
-    def get_command(self, command: BusyCommand) -> str or list[str] or int or tuple[str, str] or None:
+    def get_command(self, command: BusyGetCommand) -> str or list[str] or int or tuple[str, str] or None:
         """
         Executes a GET command and returns the result.
 
         Args:
-            command (BusyCommand): The command to execute. Must be a GET command.
+            command (BusyGetCommand): The command to execute. Must be a GET command.
 
         Returns:
             str: The result as a string if the return type is STRING.
@@ -41,19 +41,13 @@ class BusyApi:
         Raises:
             BusyException: If the result could not be received or parsed.
         """
-
-        if command.min_firmware_version is not None:
-            min_firmware_version =  version.parse(command.min_firmware_version)
-            firmware_version = version.parse(self.get_command(Command.GetFirmwareVersion))
-            if firmware_version < min_firmware_version:
-                clean_command = command.action.rstrip('\r\n')
-                raise BusyException(f"Command {clean_command} requires firmware version {command.min_firmware_version} or higher, but current version is {firmware_version}.", ErrorCode.FIRMWARE_VERSION_TOO_LOW)
+        self._command_firmware_version_check(command.action, command.min_firmware_version)
 
         if command.return_type == BusyReturnType.NUMBER:
             result = self._get_result(command.action.encode(), command.regex, command.error_msg, command.error_code)
             return int(result) if result is not None else None
 
-        elif command.return_type == BusyReturnType.TUPLE:
+        if command.return_type == BusyReturnType.TUPLE:
             result = self._get_result(command.action.encode(), command.regex, command.error_msg, command.error_code)
             if result:
                 match = re.match(r'(.*?),(.*)', result)
@@ -63,7 +57,7 @@ class BusyApi:
 
             return None
 
-        elif command.return_type == BusyReturnType.LIST:
+        if command.return_type == BusyReturnType.LIST:
             return self._get_list(command.action.encode(), command.regex, command.error_msg, command.error_code)
 
         return self._get_result(command.action.encode(), command.regex, command.error_msg, command.error_code)
@@ -78,110 +72,38 @@ class BusyApi:
         Raises:
             BusyException: If the free or total storage size could not be received from response.
         """
-        total_storage = self.get_command(Command.GetTotalStorageSize)
-        free_storage = self.get_command(Command.GetFreeStorageSize)
+        total_storage = self.get_command(BusyCommand.GetTotalStorageSize)
+        free_storage = self.get_command(BusyCommand.GetFreeStorageSize)
         used_storage = total_storage - free_storage
         used_percentage = (used_storage / total_storage) * 100
         return int(min(100, max(0, math.ceil(used_percentage))))
 
-    # Set Commands
-    def set_solid_color(self, led_bits:int, color_hex:str) -> bool:
-        if not self._is_valid_hex_color(color_hex):
-            # TODO ERROR HANDLING
-            print("Invalid color format.")
-            return False
+    def set_command(self, command: BusyGetCommand, params: dict) -> bool | None:
+        # TODO Validation of params
+        # TODO response validation
 
-        command = Command.SetSolidColor.format(led_bits=led_bits, color_hex=color_hex)
-        response = self._send_serial_command(command.encode())
-        print(response)
-        # TODO ERROR HANDLING
-        return True
+        self._command_firmware_version_check(command.action, command.min_firmware_version)
 
-    def set_showing_picture(self, filename:str) -> bool:
-        # TODO : Implement
-        command = Command.SetShowingPicture.format(filename=filename)
-        response = self._send_serial_command(command.encode())
-        print(response)
-        # TODO ERROR HANDLING
-        return True
+        if command.return_type == BusyReturnType.BOOLEAN:
+            command = command.action.format(**params)
+            response = self._send_serial_command(command.encode())
+            print(response)
+            return True
 
-    def set_display_brightness(self, brightness:int) -> bool:
-        # TODO : Implement
-        command = Command.SetDisplayBrightness.format(brightness=brightness)
-        response = self._send_serial_command(command.encode())
-        print(response)
-        # TODO ERROR HANDLING
-        return True
+        return None
 
-    def set_show_after_drop(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
+    def _command_firmware_version_check(self, command: str, min_firmware_version: str) -> None:
+        if min_firmware_version is None:
+            return
 
-    def set_allowed_web_file_server(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
+        min_firmware_version =  version.parse(min_firmware_version)
+        firmware_version = version.parse(self.get_command(BusyCommand.GetFirmwareVersion))
 
-    def set_wifi_config(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
+        if firmware_version >= min_firmware_version:
+            return
 
-    def set_usb_mass_storage_allowed(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def set_custom_pattern(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def get_custom_pattern(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def set_allowed_auto_storage_scan(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def get_allowed_auto_storage_scan(self) -> int or None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    # Actions
-
-    def get_file(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def upload_file(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def delete_file(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def restart_device(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def format_disk(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def activate_file_storage_scan(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def factory_reset_main_config_file(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def factory_reset_wifi_config_file(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
-
-    def factory_reset_default_image(self) -> None:
-        # TODO : Implement me
-        raise NotImplementedError
+        clean_command = command.rstrip('\r\n')
+        raise BusyException(f"Command {clean_command} requires firmware version {min_firmware_version} or higher, but current version is {firmware_version}.", ErrorCode.FIRMWARE_VERSION_TOO_LOW)
 
     def _get_result(self, command: bytes, regex: str, error_message: str, error_code: ErrorCode) -> str:
         """
@@ -256,10 +178,10 @@ class BusyApi:
                 self._busy_tag_serial.write(command)
                 self._busy_tag_serial.flush()
                 return self._busy_tag_serial.readlines()
-            else:
-                # TODO ERROR HANDLING
-                print("Serial connection is not open.")
-                return None
+
+            # TODO ERROR HANDLING
+            print("Serial connection is not open.")
+            return None
         except serial.SerialException as e:
             # TODO ERROR HANDLING
             print(f"Failed to send command: {e}")
