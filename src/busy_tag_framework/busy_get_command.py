@@ -1,5 +1,5 @@
 from busy_tag_framework.busy_return_type import BusyReturnType
-from busy_tag_framework.error_code import ErrorCode
+from busy_tag_framework.busy_error_code import BusyErrorCode
 
 
 class BusyGetCommand:
@@ -8,7 +8,7 @@ class BusyGetCommand:
                  action: str,
                  regex: str,
                  error_msg: str,
-                 error_code: ErrorCode,
+                 error_code: BusyErrorCode,
                  return_type: BusyReturnType,
                  min_firmware_version: str = None):
         self.action = action

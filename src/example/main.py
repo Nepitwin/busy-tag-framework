@@ -9,7 +9,7 @@ from busy_tag_framework.led import Led
 
 devices = serial_operations.find_all_busy_tag_devices()
 if not devices:
-    print("No devices found.")
+    print("No busy device found.")
     sys.exit(0)
 
 print(devices)
@@ -67,23 +67,44 @@ with BusyApi(devices[0]) as busy_api:
     print(f"SetShowAfterDrop: {busy_api.set_command(BusyCommand.SetShowAfterDrop, {'active': 1})}")
     print(f"GetShowAfterDrop: {busy_api.get_command(BusyCommand.GetShowAfterDrop)}")
 
-    # This command force a reconnection to the device. Afterwards the device must be reinitialized.
-    #print(f"SetAllowedWebFileServer: {busy_api.set_command(BusyCommand.SetAllowedWebFileServer, {'active': 1})}")
-    #print(f"GetAllowedWebFileServer: {busy_api.get_command(BusyCommand.GetAllowedWebFileServer)}")
-    #print(f"SetAllowedWebFileServer: {busy_api.set_command(BusyCommand.SetAllowedWebFileServer, {'active': 0})}")
-    print(f"GetAllowedWebFileServer: {busy_api.get_command(BusyCommand.GetAllowedWebFileServer)}")
-
     print(f"SetWifiConfig: {busy_api.set_command(BusyCommand.SetWifiConfig, {'ssid': 'my_ssid', 'password': 'my_password'})}")
     print(f"GetWifiConfig: {busy_api.get_command(BusyCommand.GetWifiConfig)}")
 
-    #print(f"SetUsbMassStorageAllowed: {busy_api.set_command(BusyCommand.SetUsbMassStorageAllowed, {'active': 0})}")
-    #print(f"GetUsbMassStorageAllowed: {busy_api.get_command(BusyCommand.GetUsbMassStorageAllowed)}")
-    # This command force a reconnection to the device. Afterwards the device must be reinitialized.
-    # print(f"SetUsbMassStorageAllowed: {busy_api.set_command(BusyCommand.SetUsbMassStorageAllowed, {'active': 1})}")
-    print(f"GetUsbMassStorageAllowed: {busy_api.get_command(BusyCommand.GetUsbMassStorageAllowed)}")
-
     # TODO Set
     print(f"GetLastErrorCode: {busy_api.get_command(BusyCommand.GetLastErrorCode)}")
+
+    allowed_web_file_server_example = False
+
+    if allowed_web_file_server_example:
+        # This command force a reconnection to the device.
+        # Auto reconnect will be used.
+        # All previous commands will be lost and busy tag will be reinitialized.
+        print(f"SetAllowedWebFileServer: {busy_api.set_command(BusyCommand.SetAllowedWebFileServer, {'active': 1})}")
+        print(f"GetAllowedWebFileServer: {busy_api.get_command(BusyCommand.GetAllowedWebFileServer)}")
+        print(f"SetAllowedWebFileServer: {busy_api.set_command(BusyCommand.SetAllowedWebFileServer, {'active': 0})}")
+        print(f"GetAllowedWebFileServer: {busy_api.get_command(BusyCommand.GetAllowedWebFileServer)}")
+
+    allowed_auto_storage_example = False
+
+    if allowed_auto_storage_example:
+        # This command force a reconnection to the device.
+        # Auto reconnect will be used.
+        # All previous commands will be lost and busy tag will be reinitialized.
+        print(f"SetAllowedAutoStorageScan: {busy_api.set_command(BusyCommand.SetAllowedAutoStorageScan, {'active': 0})}")
+        print(f"GetAllowedAutoStorageScan: {busy_api.get_command(BusyCommand.GetAllowedAutoStorageScan)}")
+        print(f"SetAllowedAutoStorageScan: {busy_api.set_command(BusyCommand.SetAllowedAutoStorageScan, {'active': 1})}")
+        print(f"GetAllowedAutoStorageScan: {busy_api.get_command(BusyCommand.GetAllowedAutoStorageScan)}")
+
+    usb_mass_storage_allowed_example = False
+
+    if usb_mass_storage_allowed_example:
+        # This command force a reconnection to the device.
+        # Auto reconnect will be used.
+        # All previous commands will be lost and busy tag will be reinitialized.
+        print(f"SetUsbMassStorageAllowed: {busy_api.set_command(BusyCommand.SetUsbMassStorageAllowed, {'active': 0})}")
+        print(f"GetUsbMassStorageAllowed: {busy_api.get_command(BusyCommand.GetUsbMassStorageAllowed)}")
+        print(f"SetUsbMassStorageAllowed: {busy_api.set_command(BusyCommand.SetUsbMassStorageAllowed, {'active': 1})}")
+        print(f"GetUsbMassStorageAllowed: {busy_api.get_command(BusyCommand.GetUsbMassStorageAllowed)}")
 
     try:
         print(f"GetLastResetReasonForCoreZero: {busy_api.get_command(BusyCommand.GetLastResetReasonForCoreZero)}")

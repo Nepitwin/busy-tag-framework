@@ -1,6 +1,6 @@
 from enum import Enum
 
-class ErrorCode(Enum):
+class BusyErrorCode(Enum):
     DEVICE_NAME_NOT_FOUND = 1001
     MANUFACTURE_NAME_NOT_FOUND = 1002
     DEVICE_ID_NOT_FOUND = 1003
@@ -21,3 +21,4 @@ class ErrorCode(Enum):
     FIRMWARE_VERSION_TOO_LOW = 1018
     GET_LAST_RESET_CODE_CORE_ZERO = 1019
     GET_LAST_RESET_CODE_CORE_ONE = 1020
+    GET_ALLOWED_AUTO_STORAGE_NOT_FOUND = 1021

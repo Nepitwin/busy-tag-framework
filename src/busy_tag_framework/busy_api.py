@@ -1,5 +1,7 @@
 import re
 import math
+import time
+
 import serial
 
 from packaging import version
@@ -7,7 +9,8 @@ from busy_tag_framework.busy_get_command import BusyGetCommand
 from busy_tag_framework.busy_return_type import BusyReturnType
 from busy_tag_framework.busy_command import BusyCommand
 from busy_tag_framework.busy_exception import BusyException
-from busy_tag_framework.error_code import ErrorCode
+from busy_tag_framework.busy_error_code import BusyErrorCode
+from busy_tag_framework.serial_operations import find_busy_tag_device
 
 
 class BusyApi:
@@ -103,9 +106,9 @@ class BusyApi:
             return
 
         clean_command = command.rstrip('\r\n')
-        raise BusyException(f"Command {clean_command} requires firmware version {min_firmware_version} or higher, but current version is {firmware_version}.", ErrorCode.FIRMWARE_VERSION_TOO_LOW)
+        raise BusyException(f"Command {clean_command} requires firmware version {min_firmware_version} or higher, but current version is {firmware_version}.", BusyErrorCode.FIRMWARE_VERSION_TOO_LOW)
 
-    def _get_result(self, command: bytes, regex: str, error_message: str, error_code: ErrorCode) -> str:
+    def _get_result(self, command: bytes, regex: str, error_message: str, error_code: BusyErrorCode) -> str:
         """
         Sends a command and parses the response using the given regular expression.
 
@@ -113,7 +116,7 @@ class BusyApi:
             command (bytes): The command to send.
             regex (str): The regular expression to use for parsing the response.
             error_message (str): The error message to raise if the response is not found.
-            error_code (ErrorCode): The error code to raise if the response is not found.
+            error_code (BusyErrorCode): The error code to raise if the response is not found.
 
         Returns:
             str: The parsed response if found.
@@ -126,7 +129,7 @@ class BusyApi:
             return result
         raise BusyException(error_message, error_code)
 
-    def _get_list(self, command: bytes, regex: str, error_message: str, error_code: ErrorCode) -> list[str]:
+    def _get_list(self, command: bytes, regex: str, error_message: str, error_code: BusyErrorCode) -> list[str]:
         """
         Sends a command to the device, parses the response using the given regular expression, and returns a list of matches.
 
@@ -134,7 +137,7 @@ class BusyApi:
             command (str): The command to send to the device.
             regex (str): The regular expression to use for parsing the response.
             error_message (str): The error message to raise if the response is not found.
-            error_code (ErrorCode): The error code to raise if the response is not found.
+            error_code (BusyErrorCode): The error code to raise if the response is not found.
 
         Returns:
             list[str]: A list of strings that match the regular expression in the response.
@@ -183,9 +186,28 @@ class BusyApi:
             print("Serial connection is not open.")
             return None
         except serial.SerialException as e:
+
+            device = self._reconnect()
+            if device:
+                self._port = device["port"]
+                self._device = device["device"]
+                self._busy_tag_serial = self._open_serial_connection(device["port"])
+                return self._send_serial_command(command)
+
             # TODO ERROR HANDLING
             print(f"Failed to send command: {e}")
             return None
+
+    def _reconnect(self) -> dict or None:
+        retry = 0
+        device = None
+
+        while device is None and retry < 20:
+            time.sleep(0.25)
+            device = find_busy_tag_device(self._device, self._port)
+            retry += 1
+
+        return device
 
     @staticmethod
     def _open_serial_connection(port:str, baudrate:int=115200) -> serial or None:

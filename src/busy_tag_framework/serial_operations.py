@@ -3,7 +3,19 @@ import serial.tools.list_ports
 
 from busy_tag_framework.busy_command import BusyCommand
 
-def find_all_busy_tag_devices() -> list or None:
+def find_busy_tag_device(identifier: str, port: str) -> dict or None:
+    devices = find_all_busy_tag_devices()
+
+    if devices is None:
+        return None
+
+    for device in devices:
+        if identifier in device["device"] and device["port"] == port:
+            return device
+
+    return None
+
+def find_all_busy_tag_devices() -> list[dict] or None:
     devices = []
 
     ports = serial.tools.list_ports.comports()
@@ -44,5 +56,4 @@ def find_all_busy_tag_devices() -> list or None:
     if len(devices) > 0:
         return devices
 
-    print("No Busy Tag device found.")
     return None
